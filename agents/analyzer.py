@@ -8,6 +8,86 @@ from config.settings import settings
 logger = logging.getLogger(__name__)
 
 
+class AnalyzerAgent:
+    """Analyzer agent for market data analysis."""
+    
+    def __init__(self):
+        self.ema_period = settings.analyzer.ema_period
+        self.min_profit_threshold_bps = settings.analyzer.min_profit_threshold_bps
+        self.max_hops = settings.analyzer.max_hops
+        self.max_deviation_bps = settings.analyzer.max_deviation_bps
+    
+    async def analyze_market_data(self, state: BotState) -> BotState:
+        """Analyze market data and detect opportunities."""
+        logger.info("Analyze: Starting market analysis")
+        
+        market_data = state.get("market_data")
+        if not market_data:
+            logger.warning("Analyze: No market data available")
+            state["opportunities"] = []
+            state["analysis_metadata"] = {"ema": 0, "deviation_bps": 0}
+            return state
+        
+        current_price = market_data["price"]
+        price_history = state.get("price_history", [])
+        
+        # Update price history
+        updated_history = price_history + [market_data]
+        if len(updated_history) > 20:
+            updated_history = updated_history[-20:]
+        state["price_history"] = updated_history
+        
+        # Calculate EMA
+        prices = [md["price"] for md in updated_history]
+        ema = calculate_ema(prices, self.ema_period)
+        
+        # Calculate deviation
+        if ema > 0:
+            deviation_bps = ((current_price - ema) / ema) * 10000
+        else:
+            deviation_bps = 0
+        
+        logger.info(f"Analyze: Current price={current_price}, EMA={ema:.2f}, Deviation={deviation_bps:.2f} bps")
+        
+        # Check for opportunities
+        opportunities = []
+        
+        if abs(deviation_bps) > self.min_profit_threshold_bps:
+            # Create opportunity
+            risk_score = calculate_risk_score(
+                price_impact_bps=abs(deviation_bps) * 0.1,  # Estimated impact
+                num_hops=1,  # Default for MVP
+                deviation_bps=abs(deviation_bps),
+                max_hops=self.max_hops,
+                max_deviation_bps=self.max_deviation_bps
+            )
+            
+            opportunity: Opportunity = {
+                "id": f"opp_{datetime.utcnow().timestamp()}",
+                "type": "arbitrage",
+                "chain_from": 101,  # Solana devnet
+                "chain_to": 101,
+                "expected_return_bps": abs(deviation_bps),
+                "risk_score": risk_score,
+                "required_capital_usd": 100.0,  # Default for MVP
+                "expiry_block": 0  # Will be set by executor
+            }
+            
+            opportunities.append(opportunity)
+            logger.info(f"Analyze: Opportunity detected! Return={abs(deviation_bps):.2f} bps, Risk={risk_score:.2f}")
+        else:
+            logger.info(f"Analyze: No opportunity (threshold={self.min_profit_threshold_bps} bps)")
+        
+        state["opportunities"] = opportunities
+        state["analysis_metadata"] = {
+            "ema": ema,
+            "deviation_bps": deviation_bps,
+            "threshold_bps": self.min_profit_threshold_bps
+        }
+        
+        return state
+
+
 def calculate_ema(prices: List[float], period: int) -> float:
     """Calculate Exponential Moving Average."""
     if not prices:
@@ -55,74 +135,5 @@ def calculate_risk_score(
     return min(risk_score, 1.0)
 
 
-async def analyze_market_data(state: BotState) -> BotState:
-    """Analyze market data and detect opportunities."""
-    logger.info("Analyze: Starting market analysis")
-    
-    market_data = state.get("market_data")
-    if not market_data:
-        logger.warning("Analyze: No market data available")
-        state["opportunities"] = []
-        state["analysis_metadata"] = {"ema": 0, "deviation_bps": 0}
-        return state
-    
-    current_price = market_data["price"]
-    price_history = state.get("price_history", [])
-    
-    # Update price history
-    updated_history = price_history + [market_data]
-    if len(updated_history) > 20:
-        updated_history = updated_history[-20:]
-    state["price_history"] = updated_history
-    
-    # Calculate EMA
-    prices = [md["price"] for md in updated_history]
-    ema_period = settings.analyzer.ema_period
-    ema = calculate_ema(prices, ema_period)
-    
-    # Calculate deviation
-    if ema > 0:
-        deviation_bps = ((current_price - ema) / ema) * 10000
-    else:
-        deviation_bps = 0
-    
-    logger.info(f"Analyze: Current price={current_price}, EMA={ema:.2f}, Deviation={deviation_bps:.2f} bps")
-    
-    # Check for opportunities
-    opportunities = []
-    min_threshold = settings.analyzer.min_profit_threshold_bps
-    
-    if abs(deviation_bps) > min_threshold:
-        # Create opportunity
-        risk_score = calculate_risk_score(
-            price_impact_bps=abs(deviation_bps) * 0.1,  # Estimated impact
-            num_hops=1,  # Default for MVP
-            deviation_bps=abs(deviation_bps),
-            max_hops=settings.analyzer.max_hops,
-            max_deviation_bps=settings.analyzer.max_deviation_bps
-        )
-        
-        opportunity: Opportunity = {
-            "id": f"opp_{datetime.utcnow().timestamp()}",
-            "type": "arbitrage",
-            "chain_from": 101,  # Solana devnet
-            "chain_to": 101,
-            "expected_return_bps": abs(deviation_bps),
-            "risk_score": risk_score,
-            "required_capital_usd": 100.0,  # Default for MVP
-            "expiry_block": 0  # Will be set by executor
-        }
-        
-        opportunities.append(opportunity)
-        logger.info(f"Analyze: Opportunity detected! Return={abs(deviation_bps):.2f} bps, Risk={risk_score:.2f}")
-    else:
-        logger.info(f"Analyze: No opportunity (threshold={min_threshold} bps)")
-    
-    state["opportunities"] = opportunities
-    state["analysis_metadata"] = {
-        "ema": ema,
-        "deviation_bps": deviation_bps,
-        "threshold_bps": min_threshold
-    }
-    
-    return state
+# Global analyzer instance
+analyzer_agent = AnalyzerAgent()

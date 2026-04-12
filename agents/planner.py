@@ -4,9 +4,9 @@ from datetime import datetime
 from typing import Annotated, List
 from langgraph.graph import StateGraph, END
 from agents.state import BotState, MarketData
-from agents.analyzer import analyze_market_data
-from agents.executor import execute_trade
-from agents.monitor import check_and_heal
+from agents.analyzer import analyzer_agent
+from agents.executor import executor_agent
+from agents.monitor import monitor_agent
 from config.settings import settings
 
 logger = logging.getLogger(__name__)
@@ -24,10 +24,10 @@ class PlannerAgent:
         
         # Add nodes
         workflow.add_node("perceive", self.perceive)
-        workflow.add_node("analyze", analyze_market_data)
+        workflow.add_node("analyze", analyzer_agent.analyze_market_data)
         workflow.add_node("plan", self.create_plan)
-        workflow.add_node("execute", execute_trade)
-        workflow.add_node("monitor", check_and_heal)
+        workflow.add_node("execute", executor_agent.execute_trade)
+        workflow.add_node("monitor", monitor_agent.check_and_heal)
         
         # Set entry point
         workflow.set_entry_point("perceive")
