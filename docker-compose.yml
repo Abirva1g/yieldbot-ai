@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  yieldbot:
+    build: .
+    container_name: yieldbot-ai
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      # Persist logs
+      - ./logs:/app/logs
+      # Persist state (pause flag, etc.)
+      - ./state:/app/state
+    networks:
+      - yieldbot-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sys; sys.exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Optional: Redis for distributed state (pause flag, etc.)
+  redis:
+    image: redis:7-alpine
+    container_name: yieldbot-redis
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    networks:
+      - yieldbot-network
+    command: redis-server --appendonly yes
+
+volumes:
+  redis-data:
+
+networks:
+  yieldbot-network:
+    driver: bridge

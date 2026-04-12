@@ -57,6 +57,15 @@ class OpenAIConfig(BaseSettings):
         extra = "ignore"
 
 
+class TelegramConfig(BaseSettings):
+    bot_token: Optional[str] = Field(default=None, description="Telegram bot token")
+    chat_id: Optional[str] = Field(default=None, description="Telegram chat ID")
+    
+    class Config:
+        env_prefix = "TELEGRAM_"
+        extra = "ignore"
+
+
 class Settings(BaseSettings):
     solana: SolanaConfig = Field(default_factory=SolanaConfig)
     jupiter: JupiterConfig = Field(default_factory=JupiterConfig)
@@ -64,6 +73,7 @@ class Settings(BaseSettings):
     executor: ExecutorConfig = Field(default_factory=ExecutorConfig)
     monitor: MonitorConfig = Field(default_factory=MonitorConfig)
     openai: OpenAIConfig = Field(default_factory=OpenAIConfig)
+    telegram: TelegramConfig = Field(default_factory=TelegramConfig)
     
     class Config:
         env_file = ".env"

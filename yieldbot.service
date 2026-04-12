@@ -1,0 +1,42 @@
+[Unit]
+Description=YieldBot AI Autonomous DeFi Agent
+After=network.target docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+User=yieldbot
+Group=yieldbot
+WorkingDirectory=/home/yieldbot/yieldbot-ai
+
+# Environment file
+EnvironmentFile=/home/yieldbot/yieldbot-ai/.env
+
+# Docker run command
+ExecStartPre=-/usr/bin/docker stop yieldbot-ai
+ExecStartPre=-/usr/bin/docker rm yieldbot-ai
+ExecStart=/usr/bin/docker run --rm \
+    --name yieldbot-ai \
+    --restart unless-stopped \
+    --env-file /home/yieldbot/yieldbot-ai/.env \
+    -v /home/yieldbot/yieldbot-ai/logs:/app/logs \
+    -v /home/yieldbot/yieldbot-ai/state:/app/state \
+    yieldbot-ai:latest
+
+ExecStop=/usr/bin/docker stop yieldbot-ai
+
+# Restart policy
+Restart=always
+RestartSec=10
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=yieldbot
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
