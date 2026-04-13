@@ -1,36 +1,43 @@
 ```
-# Python
+# Dependencies
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-
-# Logs
-*.log
-
-# Environment
-.env
-.env.local
-*.env.*
-
-# Dependencies
-.venv/
+.Python
+env/
 venv/
+.venv/
+.ENV
+.venv.bak/
 pip-log.txt
 pip-delete-this-directory.txt
-
-# Coverage reports
+.tox/
 .coverage
-htmlcov/
-
-# Pytest cache
-.pytest_cache/
-
-# MyPy cache
-.mypy_cache/
-
-# Distribution / packaging
-dist/
-build/
-*.egg-info/
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+.MF
+tags
+TAGS
+ID
+GPATH
+GTAGS
+GNUS
+.project
+.pydevproject
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
 ```
