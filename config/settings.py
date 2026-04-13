@@ -21,8 +21,8 @@ class JupiterConfig(BaseSettings):
 
 
 class AnalyzerConfig(BaseSettings):
-    ema_period: int = Field(default=10, description="EMA period for price calculation")
-    min_profit_threshold_bps: int = Field(default=50, description="Minimum profit threshold in basis points")
+    ema_period: int = Field(default=5, description="EMA period for price calculation")
+    min_profit_threshold_bps: int = Field(default=10, description="Minimum profit threshold in basis points")
     max_deviation_bps: int = Field(default=500, description="Maximum deviation before marking as suspicious")
     max_hops: int = Field(default=2, description="Maximum number of hops in route")
     
