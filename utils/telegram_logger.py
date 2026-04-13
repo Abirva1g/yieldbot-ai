@@ -26,6 +26,7 @@ class TelegramLogger:
     async def send_message(self, message: str, parse_mode: str = "Markdown") -> bool:
         """Send a message to Telegram chat"""
         if not self.enabled:
+            logger.debug("Telegram logging disabled: skipping message")
             return False
         
         try:
@@ -40,20 +41,21 @@ class TelegramLogger:
                     }
                 )
                 
-                if response.status_code == 200:
-                    result = response.json()
-                    if result.get("ok"):
-                        logger.debug("Telegram message sent successfully")
-                        return True
-                    else:
-                        logger.error(f"Telegram API error: {result}")
-                        return False
+                response.raise_for_status()
+                result = response.json()
+                if result.get("ok"):
+                    logger.debug("Telegram message sent successfully")
+                    return True
                 else:
-                    logger.error(f"Telegram HTTP error: {response.status_code} - {response.text}")
+                    error_desc = result.get("description", "Unknown error")
+                    logger.error(f"Telegram API error: {error_desc}")
                     return False
                     
         except httpx.TimeoutException:
             logger.error("Telegram request timed out")
+            return False
+        except httpx.HTTPStatusError as e:
+            logger.error(f"Telegram HTTP status error: {e.response.status_code} - {e.response.text}")
             return False
         except Exception as e:
             logger.error(f"Failed to send Telegram message: {e}")
