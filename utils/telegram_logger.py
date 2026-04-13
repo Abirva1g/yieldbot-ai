@@ -105,7 +105,7 @@ class TelegramLogger:
         """Send notification on bot startup"""
         message = (
             "🤖 *YieldBot AI Started*\n\n"
-            f"Network: `{settings.solana.network}`\n"
+            f"Network: `{"Devnet" if "devnet" in settings.solana.rpc_url else "Mainnet"}`\n"
             f"Mode: {'Live' if not settings.solana.rpc_url.endswith('devnet') else 'Devnet'}\n\n"
             "Autonomous trading loop initiated."
         )

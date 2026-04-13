@@ -22,6 +22,13 @@ class AnalyzerAgent:
         logger.info("Analyze: Starting market analysis")
         
         market_data = state.get("market_data")
+        price_history = state.get("price_history", [])
+        
+        # Fallback to last price history item if no market_data
+        if not market_data and price_history:
+            market_data = price_history[-1]
+            logger.info(f"Analyze: Using last price history item as market_data: ${market_data['price']:.2f}")
+        
         if not market_data:
             logger.warning("Analyze: No market data available")
             state["opportunities"] = []
@@ -29,7 +36,6 @@ class AnalyzerAgent:
             return state
         
         current_price = market_data["price"]
-        price_history = state.get("price_history", [])
         
         # Update price history
         updated_history = price_history + [market_data]
