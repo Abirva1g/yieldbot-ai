@@ -1,10 +1,36 @@
-.env
+```
+# Python
 __pycache__/
 *.pyc
 *.pyo
-logs/
+*.pyd
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Dependencies
 .venv/
 venv/
-.DS_Store
-*.log
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Coverage reports
+.coverage
+htmlcov/
+
+# Pytest cache
 .pytest_cache/
+
+# MyPy cache
+.mypy_cache/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+```

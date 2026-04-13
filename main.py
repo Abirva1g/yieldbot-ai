@@ -69,7 +69,8 @@ async def main():
             
             # Run one iteration of the graph
             try:
-                state = await planner.run_iteration(state)
+                # LangGraph использует invoke для запуска
+                state = await planner.ainvoke(state)
                 
                 # Log iteration summary
                 health = state.get("health_status", "unknown")
