@@ -7,6 +7,7 @@ from typing import Optional
 class SolanaConfig(BaseSettings):
     rpc_url: str = Field(default="https://api.devnet.solana.com", description="Solana RPC URL")
     ws_url: str = Field(default="wss://api.devnet.solana.com", description="Solana WebSocket URL")
+    private_key: Optional[str] = Field(default=None, description="Solana wallet private key (Base58)")
     
     class Config:
         extra = "ignore"

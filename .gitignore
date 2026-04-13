@@ -1,1 +1,41 @@
-Nothing to output - the modified file 'main.py' is a source code file and no build artifacts, dependencies, or temporary files were detected in the changes.
+```
+# Environment variables
+.env
+.env.local
+.env.*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.venv.bak/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+*.so
+.TemporaryItems
+.deps.tmb
+Icon?
+.DS_Store*
+._*
+.pytest_cache/
+.mypy_cache/
+.hypothesis/
+.coverage*
+```
