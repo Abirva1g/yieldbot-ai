@@ -14,7 +14,8 @@ class JupiterService:
     def __init__(self, use_mock: bool = False):
         self.client = httpx.AsyncClient(timeout=10.0)
         self.use_mock = use_mock
-        self.is_devnet = "devnet" in settings.solana_rpc_url.lower()
+        # Use nested settings structure
+        self.is_devnet = "devnet" in settings.solana.rpc_url.lower()
         
     async def get_quote(self, amount: int, slippage_bps: int = 50) -> Optional[Dict[str, Any]]:
         """Fetch quote from Jupiter Aggregator v6 API"""
